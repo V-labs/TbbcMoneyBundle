@@ -6,6 +6,7 @@ namespace Tbbc\MoneyBundle\Money;
 
 use Money\Currency;
 use Money\Money;
+use Tbbc\MoneyBundle\Repository\DoctrineCurrencyRepository;
 
 /**
  * Class MoneyManager.
@@ -17,7 +18,7 @@ class MoneyManager implements MoneyManagerInterface
     /**
      * MoneyManager constructor.
      */
-    public function __construct(protected string $referenceCurrencyCode, protected int $decimals = 2)
+    public function __construct(protected DoctrineCurrencyRepository $doctrineCurrencyRepository, protected int $decimals = 2)
     {
     }
 
@@ -27,7 +28,7 @@ class MoneyManager implements MoneyManagerInterface
     public function createMoneyFromFloat(float $floatAmount, ?string $currencyCode = null): Money
     {
         if (is_null($currencyCode)) {
-            $currencyCode = $this->referenceCurrencyCode;
+            $currencyCode = $this->doctrineCurrencyRepository->getReferenceCurrency()->getCurrencyCode();
         }
         $currency = new Currency($currencyCode);
         $amountAsInt = $floatAmount * 10 ** $this->decimals;

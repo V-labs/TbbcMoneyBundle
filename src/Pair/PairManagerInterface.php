@@ -49,11 +49,6 @@ interface PairManagerInterface
     public function getRatioList(): array;
 
     /**
-     * just for dependency injection. inject if needed the ratio provider.
-     */
-    public function setRatioProvider(RatioProviderInterface $ratioProvider): void;
-
-    /**
      * If ratio provider is defined, get currency code list, and fetch ratio
      * from the ratio provider.
      */

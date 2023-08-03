@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Tbbc\MoneyBundle\Pair\Storage;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Tbbc\MoneyBundle\Entity\DoctrineCurrency;
 use Tbbc\MoneyBundle\Entity\DoctrineStorageRatio;
 use Tbbc\MoneyBundle\Pair\StorageInterface;
+use Tbbc\MoneyBundle\Repository\DoctrineCurrencyRepository;
 
 /**
  * Class DoctrineStorage.
@@ -17,8 +19,11 @@ class DoctrineStorage implements StorageInterface
 {
     protected array $ratioList = [];
 
-    public function __construct(protected EntityManagerInterface $entityManager, protected string $referenceCurrencyCode)
+    protected DoctrineCurrencyRepository $doctrineCurrencyRepository;
+
+    public function __construct(protected EntityManagerInterface $entityManager)
     {
+        $this->doctrineCurrencyRepository = $this->entityManager->getRepository(DoctrineCurrency::class);
     }
 
     public function loadRatioList(bool $force = false): array
@@ -31,7 +36,7 @@ class DoctrineStorage implements StorageInterface
         $doctrineStorageRatios = $repository->findAll();
 
         if (0 === count($doctrineStorageRatios)) {
-            $this->ratioList = [$this->referenceCurrencyCode => 1.0];
+            $this->ratioList = [$this->doctrineCurrencyRepository->getReferenceCurrency()->getCurrencyCode() => 1.0];
             $this->saveRatioList($this->ratioList);
 
             return $this->ratioList;

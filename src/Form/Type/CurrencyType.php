@@ -8,22 +8,17 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Tbbc\MoneyBundle\Entity\DoctrineCurrency;
 use Tbbc\MoneyBundle\Form\DataTransformer\CurrencyToArrayTransformer;
+use Tbbc\MoneyBundle\Repository\DoctrineCurrencyRepository;
 
 /**
  * Formtype for the Currency object.
  */
 class CurrencyType extends AbstractType
 {
-    /**
-     * @param string[] $currencyCodeList currency codes array eg ["USD", "EUR"]
-     */
     public function __construct(
-        protected array $currencyCodeList,
-        /**
-         * currency code like "USD", "EUR".
-         */
-        protected string $referenceCurrencyCode
+        protected DoctrineCurrencyRepository $doctrineCurrencyRepository,
     ) {
     }
 
@@ -52,15 +47,20 @@ class CurrencyType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver): void
     {
+        $referenceCurrencyCode = $this->doctrineCurrencyRepository->getReferenceCurrency()->getCurrencyCode();
+        $currencyCodeList = array_map(function (DoctrineCurrency $doctrineCurrency) {
+            return $doctrineCurrency->getCurrencyCode();
+        }, $this->doctrineCurrencyRepository->findAll());
+
         $resolver->setRequired(['reference_currency', 'currency_choices']);
         $resolver->setDefaults([
-            'reference_currency' => $this->referenceCurrencyCode,
-            'currency_choices' => $this->currencyCodeList,
+            'reference_currency' => $referenceCurrencyCode,
+            'currency_choices' => $currencyCodeList,
             'currency_options' => [],
         ]);
         $resolver->setAllowedTypes('reference_currency', 'string');
         $resolver->setAllowedTypes('currency_choices', 'array');
-        $resolver->setAllowedValues('reference_currency', $this->currencyCodeList);
+        $resolver->setAllowedValues('reference_currency', $currencyCodeList);
         $resolver->setAllowedTypes('currency_options', 'array');
     }
 

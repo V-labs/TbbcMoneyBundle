@@ -12,8 +12,11 @@ use Money\Currency;
 use Money\CurrencyPair;
 use Money\Exchange;
 use Money\Money;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Tbbc\MoneyBundle\Entity\DoctrineCurrency;
 use Tbbc\MoneyBundle\MoneyException;
+use Tbbc\MoneyBundle\Repository\DoctrineCurrencyRepository;
 use Tbbc\MoneyBundle\TbbcMoneyEvents;
 
 /**
@@ -23,16 +26,17 @@ use Tbbc\MoneyBundle\TbbcMoneyEvents;
  */
 class PairManager implements PairManagerInterface, Exchange
 {
-    protected ?RatioProviderInterface $ratioProvider = null;
     protected Currencies $currencies;
+    protected array $ratioProviders;
 
     public function __construct(
         protected StorageInterface $storage,
-        protected array $currencyCodeList,
-        protected string $referenceCurrencyCode,
-        protected EventDispatcherInterface $dispatcher
+        protected EventDispatcherInterface $dispatcher,
+        protected DoctrineCurrencyRepository $doctrineCurrencyRepository,
+        iterable $ratioProviders
     ) {
         $this->currencies = new ISOCurrencies();
+        $this->ratioProviders = $ratioProviders instanceof \Traversable ? iterator_to_array($ratioProviders) : $ratioProviders;
     }
 
     /**
@@ -115,7 +119,7 @@ class PairManager implements PairManagerInterface, Exchange
      */
     public function getCurrencyCodeList(): array
     {
-        return $this->currencyCodeList;
+        return $this->doctrineCurrencyRepository->findAll();
     }
 
     /**
@@ -123,7 +127,7 @@ class PairManager implements PairManagerInterface, Exchange
      */
     public function getReferenceCurrencyCode(): string
     {
-        return $this->referenceCurrencyCode;
+        return $this->doctrineCurrencyRepository->getReferenceCurrency()->getCurrencyCode();
     }
 
     /**
@@ -137,24 +141,17 @@ class PairManager implements PairManagerInterface, Exchange
     /**
      * {@inheritdoc}
      */
-    public function setRatioProvider(RatioProviderInterface $ratioProvider): void
-    {
-        $this->ratioProvider = $ratioProvider;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function saveRatioListFromRatioProvider(): void
     {
-        if (null === $this->ratioProvider) {
-            throw new MoneyException('no ratio provider defined');
-        }
+        /** @var DoctrineCurrency $doctrineCurrency */
+        foreach ($this->getCurrencyCodeList() as $doctrineCurrency) {
 
-        foreach ($this->getCurrencyCodeList() as $currencyCode) {
-            if ($currencyCode != $this->getReferenceCurrencyCode()) {
-                $ratio = $this->ratioProvider->fetchRatio($this->getReferenceCurrencyCode(), $currencyCode);
-                $this->saveRatio($currencyCode, $ratio);
+            if ($doctrineCurrency->getCurrencyCode() != $this->getReferenceCurrencyCode()) {
+                /** @var RatioProviderInterface $ratioProvider */
+                $ratioProvider = $this->ratioProviders[$doctrineCurrency->getProvider()];
+
+                $ratio = $ratioProvider->fetchRatio($this->getReferenceCurrencyCode(), $doctrineCurrency->getCurrencyCode());
+                $this->saveRatio($doctrineCurrency->getCurrencyCode(), $ratio);
             }
         }
     }

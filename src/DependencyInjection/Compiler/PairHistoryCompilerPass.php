@@ -27,8 +27,7 @@ class PairHistoryCompilerPass implements CompilerPassInterface
             }
 
             $pairHistoryDefinition = new Definition(\Tbbc\MoneyBundle\PairHistory\PairHistoryManager::class, [
-                new Reference('doctrine.orm.entity_manager'),
-                $container->getParameter('tbbc_money.reference_currency'),
+                new Reference('doctrine.orm.entity_manager')
             ]);
             $pairHistoryDefinition->setPublic(true);
 

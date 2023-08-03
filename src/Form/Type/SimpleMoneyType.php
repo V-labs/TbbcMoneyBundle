@@ -7,7 +7,9 @@ namespace Tbbc\MoneyBundle\Form\Type;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Tbbc\MoneyBundle\Entity\DoctrineCurrency;
 use Tbbc\MoneyBundle\Form\DataTransformer\SimpleMoneyToArrayTransformer;
+use Tbbc\MoneyBundle\Repository\DoctrineCurrencyRepository;
 
 /**
  * Formtype for the Money object.
@@ -18,14 +20,7 @@ class SimpleMoneyType extends MoneyType
 
     public function __construct(
         int $decimals,
-        /**
-         * array of string (currency code like "USD", "EUR").
-         */
-        protected array $currencyCodeList,
-        /**
-         * string (currency code like "USD", "EUR").
-         */
-        protected string $referenceCurrencyCode
+        protected DoctrineCurrencyRepository $doctrineCurrencyRepository,
     ) {
         parent::__construct($decimals);
 
@@ -55,12 +50,17 @@ class SimpleMoneyType extends MoneyType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
+        $referenceCurrencyCode = $this->doctrineCurrencyRepository->getReferenceCurrency()->getCurrencyCode();
+        $currencyCodeList = array_map(function (DoctrineCurrency $doctrineCurrency) {
+            return $doctrineCurrency->getCurrencyCode();
+        }, $this->doctrineCurrencyRepository->findAll());
+
         $resolver->setDefaults([
-            'currency' => $this->referenceCurrencyCode,
+            'currency' => $referenceCurrencyCode,
             'amount_options' => [],
         ]);
         $resolver->setAllowedTypes('currency', 'string');
-        $resolver->setAllowedValues('currency', $this->currencyCodeList);
+        $resolver->setAllowedValues('currency', $currencyCodeList);
         $resolver->setAllowedTypes('amount_options', 'array');
     }
 
