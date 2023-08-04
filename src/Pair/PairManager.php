@@ -15,6 +15,7 @@ use Money\Money;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Tbbc\MoneyBundle\Entity\DoctrineCurrency;
+use Tbbc\MoneyBundle\Manager\DoctrineCurrencyManager;
 use Tbbc\MoneyBundle\MoneyException;
 use Tbbc\MoneyBundle\Repository\DoctrineCurrencyRepository;
 use Tbbc\MoneyBundle\TbbcMoneyEvents;
@@ -32,7 +33,7 @@ class PairManager implements PairManagerInterface, Exchange
     public function __construct(
         protected StorageInterface $storage,
         protected EventDispatcherInterface $dispatcher,
-        protected DoctrineCurrencyRepository $doctrineCurrencyRepository,
+        protected DoctrineCurrencyManager $doctrineCurrencyManager,
         iterable $ratioProviders
     ) {
         $this->currencies = new ISOCurrencies();
@@ -119,7 +120,7 @@ class PairManager implements PairManagerInterface, Exchange
      */
     public function getCurrencyCodeList(): array
     {
-        return $this->doctrineCurrencyRepository->findAll();
+        return $this->doctrineCurrencyManager->getCurrencyCodeList();
     }
 
     /**
@@ -127,7 +128,7 @@ class PairManager implements PairManagerInterface, Exchange
      */
     public function getReferenceCurrencyCode(): string
     {
-        return $this->doctrineCurrencyRepository->getReferenceCurrency()->getCurrencyCode();
+        return $this->doctrineCurrencyManager->getReferenceCurrency()->getCurrencyCode();
     }
 
     /**
@@ -144,7 +145,7 @@ class PairManager implements PairManagerInterface, Exchange
     public function saveRatioListFromRatioProvider(): void
     {
         /** @var DoctrineCurrency $doctrineCurrency */
-        foreach ($this->getCurrencyCodeList() as $doctrineCurrency) {
+        foreach ($this->doctrineCurrencyManager->findAll() as $doctrineCurrency) {
 
             if ($doctrineCurrency->getCurrencyCode() != $this->getReferenceCurrencyCode()) {
                 /** @var RatioProviderInterface $ratioProvider */

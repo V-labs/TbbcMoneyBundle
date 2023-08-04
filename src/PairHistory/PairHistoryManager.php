@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NoResultException;
 use Tbbc\MoneyBundle\Entity\DoctrineCurrency;
 use Tbbc\MoneyBundle\Entity\RatioHistory;
+use Tbbc\MoneyBundle\Manager\DoctrineCurrencyManager;
 use Tbbc\MoneyBundle\MoneyException;
 use Tbbc\MoneyBundle\Pair\SaveRatioEvent;
 use Tbbc\MoneyBundle\Repository\DoctrineCurrencyRepository;
@@ -20,11 +21,8 @@ use Tbbc\MoneyBundle\Repository\DoctrineCurrencyRepository;
  */
 class PairHistoryManager implements PairHistoryManagerInterface
 {
-    protected DoctrineCurrencyRepository $doctrineCurrencyRepository;
-
-    public function __construct(protected EntityManagerInterface $em)
+    public function __construct(protected EntityManagerInterface $em, protected DoctrineCurrencyManager $doctrineCurrencyManager)
     {
-        $this->doctrineCurrencyRepository = $this->em->getRepository(DoctrineCurrency::class);
     }
 
     /**
@@ -32,7 +30,7 @@ class PairHistoryManager implements PairHistoryManagerInterface
      */
     public function getRatioAtDate(string $currencyCode, DateTimeInterface $savedAt): ?float
     {
-        $referenceCurrencyCode = $this->doctrineCurrencyRepository->getReferenceCurrency()->getCurrencyCode();
+        $referenceCurrencyCode = $this->doctrineCurrencyManager->getReferenceCurrency()->getCurrencyCode();
 
         if ($currencyCode == $referenceCurrencyCode) {
             return 1.0;
@@ -68,7 +66,7 @@ class PairHistoryManager implements PairHistoryManagerInterface
      */
     public function getRatioHistory(string $currencyCode, ?DateTimeInterface $startDate = null, ?DateTimeInterface $endDate = null): array
     {
-        $referenceCurrencyCode = $this->doctrineCurrencyRepository->getReferenceCurrency()->getCurrencyCode();
+        $referenceCurrencyCode = $this->doctrineCurrencyManager->getReferenceCurrency()->getCurrencyCode();
 
         $qb = $this->em->createQueryBuilder();
         $qb->select('rh')

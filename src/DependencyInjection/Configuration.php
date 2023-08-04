@@ -30,6 +30,10 @@ class Configuration implements ConfigurationInterface
     {
         $node
             ->children()
+                ->scalarNode('currency_class')
+                    ->isRequired()
+                    ->cannotBeEmpty()
+                ->end()
                 ->booleanNode('enable_pair_history')
                     ->defaultValue(false)
                 ->end()

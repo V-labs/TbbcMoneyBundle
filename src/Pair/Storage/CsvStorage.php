@@ -7,9 +7,9 @@ namespace Tbbc\MoneyBundle\Pair\Storage;
 use InvalidArgumentException;
 use Money\Currency;
 use Money\Exception\UnknownCurrencyException;
+use Tbbc\MoneyBundle\Manager\DoctrineCurrencyManager;
 use Tbbc\MoneyBundle\MoneyException;
 use Tbbc\MoneyBundle\Pair\StorageInterface;
-use Tbbc\MoneyBundle\Repository\DoctrineCurrencyRepository;
 
 /**
  * Class CsvStorage.
@@ -20,7 +20,7 @@ class CsvStorage implements StorageInterface
 {
     protected array $ratioList = [];
 
-    public function __construct(protected DoctrineCurrencyRepository $doctrineCurrencyRepository, protected string $ratioFileName)
+    public function __construct(protected DoctrineCurrencyManager $doctrineCurrencyManager, protected string $ratioFileName)
     {
     }
 
@@ -32,7 +32,7 @@ class CsvStorage implements StorageInterface
 
         // if filename doesn't exist, init with only reference currency code
         if (!is_file($this->ratioFileName)) {
-            $this->ratioList = [$this->doctrineCurrencyRepository->getReferenceCurrency()->getCurrencyCode() => 1.0];
+            $this->ratioList = [$this->doctrineCurrencyManager->getReferenceCurrency()->getCurrencyCode() => 1.0];
             $this->saveRatioList($this->ratioList);
 
             return $this->ratioList;

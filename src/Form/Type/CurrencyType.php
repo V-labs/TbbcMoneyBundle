@@ -8,9 +8,8 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Tbbc\MoneyBundle\Entity\DoctrineCurrency;
 use Tbbc\MoneyBundle\Form\DataTransformer\CurrencyToArrayTransformer;
-use Tbbc\MoneyBundle\Repository\DoctrineCurrencyRepository;
+use Tbbc\MoneyBundle\Manager\DoctrineCurrencyManager;
 
 /**
  * Formtype for the Currency object.
@@ -18,7 +17,7 @@ use Tbbc\MoneyBundle\Repository\DoctrineCurrencyRepository;
 class CurrencyType extends AbstractType
 {
     public function __construct(
-        protected DoctrineCurrencyRepository $doctrineCurrencyRepository,
+        protected DoctrineCurrencyManager $doctrineCurrencyManager,
     ) {
     }
 
@@ -47,10 +46,8 @@ class CurrencyType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $referenceCurrencyCode = $this->doctrineCurrencyRepository->getReferenceCurrency()->getCurrencyCode();
-        $currencyCodeList = array_map(function (DoctrineCurrency $doctrineCurrency) {
-            return $doctrineCurrency->getCurrencyCode();
-        }, $this->doctrineCurrencyRepository->findAll());
+        $referenceCurrencyCode = $this->doctrineCurrencyManager->getReferenceCurrency()->getCurrencyCode();
+        $currencyCodeList = $this->doctrineCurrencyManager->getCurrencyCodeList();
 
         $resolver->setRequired(['reference_currency', 'currency_choices']);
         $resolver->setDefaults([

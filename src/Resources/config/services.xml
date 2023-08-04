@@ -22,23 +22,28 @@
     </parameters>
 
     <services>
+        <service id="tbbc_money.doctrine_currency_manager"  class="Tbbc\MoneyBundle\Manager\DoctrineCurrencyManager" public="false">
+            <argument type="service" id="doctrine.orm.default_entity_manager" />
+            <argument>%tbbc_money.currency_class%</argument>
+        </service>
+
         <service id="tbbc_money.pair_manager" class="%tbbc_money.pair_manager.class%" public="true">
             <argument type="service" id="tbbc_money.pair.csv_storage"/>
             <argument type="service" id="event_dispatcher"/>
-            <argument type="expression">service('doctrine').getRepository('Tbbc\\MoneyBundle\\Entity\\DoctrineCurrency')</argument>
+            <argument type="service" id="tbbc_money.doctrine_currency_manager"/>
             <argument type="tagged_iterator" tag="app.exchange_provider" index-by="key"/>
         </service>
         <service id="%tbbc_money.pair_manager_interface.class%" alias="tbbc_money.pair_manager" public="false">
         </service>
         <service id="tbbc_money.money_manager" class="%tbbc_money.money_manager.class%" public="true">
-            <argument type="expression">service('doctrine').getRepository('Tbbc\\MoneyBundle\\Entity\\DoctrineCurrency')</argument>
+            <argument type="service" id="tbbc_money.doctrine_currency_manager"/>
             <argument>%tbbc_money.decimals%</argument>
         </service>
         <service id="%tbbc_money.money_manager.class%" alias="tbbc_money.money_manager" public="false">
         </service>
         <!-- Storage -->
         <service id="tbbc_money.pair.csv_storage" class="%tbbc_money.pair.csv_storage.class%" public="true">
-            <argument type="expression">service('doctrine').getRepository('Tbbc\\MoneyBundle\\Entity\\DoctrineCurrency')</argument>
+            <argument type="service" id="tbbc_money.doctrine_currency_manager"/>
             <argument>%tbbc_money.pair_manager.ratio_file_name%</argument>
         </service>
         <!-- Ratio providers -->

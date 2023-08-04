@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Tbbc\MoneyBundle\Entity;
 
-class DoctrineCurrency
+abstract class DoctrineCurrency
 {
-    protected mixed $id = null;
+    protected ?int $id = null;
     protected string $currencyCode = '';
     protected bool $reference = false;
     protected string $provider = '';
 
-    public function getId(): mixed
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function setId(mixed $id): DoctrineCurrency
+    public function setId(?int $id): DoctrineCurrency
     {
         $this->id = $id;
 

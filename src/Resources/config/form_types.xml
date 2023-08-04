@@ -8,7 +8,7 @@
 
     <services>
         <service id="tbbc_money.form_type.currency" class="%tbbc_money.form_type.currency.class%">
-            <argument type="expression">service('doctrine').getRepository('Tbbc\\MoneyBundle\\Entity\\DoctrineCurrency')</argument>
+            <argument type="service" id="tbbc_money.doctrine_currency_manager"/>
             <tag name="form.type" alias="tbbc_currency" />
         </service>
         <service id="tbbc_money.form_type.money" class="%tbbc_money.form_type.money.class%">
@@ -17,7 +17,7 @@
         </service>
         <service id="tbbc_money.form_type.simple_money" class="%tbbc_money.form_type.simple_money.class%">
             <argument>%tbbc_money.decimals%</argument>
-            <argument type="expression">service('doctrine').getRepository('Tbbc\\MoneyBundle\\Entity\\DoctrineCurrency')</argument>
+            <argument type="service" id="tbbc_money.doctrine_currency_manager"/>
             <tag name="form.type" alias="tbbc_simple_money" />
         </service>
     </services>

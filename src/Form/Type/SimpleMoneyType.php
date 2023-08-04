@@ -7,9 +7,8 @@ namespace Tbbc\MoneyBundle\Form\Type;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Tbbc\MoneyBundle\Entity\DoctrineCurrency;
 use Tbbc\MoneyBundle\Form\DataTransformer\SimpleMoneyToArrayTransformer;
-use Tbbc\MoneyBundle\Repository\DoctrineCurrencyRepository;
+use Tbbc\MoneyBundle\Manager\DoctrineCurrencyManager;
 
 /**
  * Formtype for the Money object.
@@ -20,7 +19,7 @@ class SimpleMoneyType extends MoneyType
 
     public function __construct(
         int $decimals,
-        protected DoctrineCurrencyRepository $doctrineCurrencyRepository,
+        protected DoctrineCurrencyManager $doctrineCurrencyManager,
     ) {
         parent::__construct($decimals);
 
@@ -50,10 +49,8 @@ class SimpleMoneyType extends MoneyType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $referenceCurrencyCode = $this->doctrineCurrencyRepository->getReferenceCurrency()->getCurrencyCode();
-        $currencyCodeList = array_map(function (DoctrineCurrency $doctrineCurrency) {
-            return $doctrineCurrency->getCurrencyCode();
-        }, $this->doctrineCurrencyRepository->findAll());
+        $referenceCurrencyCode = $this->doctrineCurrencyManager->getReferenceCurrency()->getCurrencyCode();
+        $currencyCodeList = $this->doctrineCurrencyManager->getCurrencyCodeList();
 
         $resolver->setDefaults([
             'currency' => $referenceCurrencyCode,
