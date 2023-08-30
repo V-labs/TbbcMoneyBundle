@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Tbbc\MoneyBundle\Entity;
 
+use DateTimeImmutable;
+use StringBackedEnum;
+
 abstract class DoctrineCurrency
 {
     protected ?int $id = null;
     protected string $currencyCode = '';
     protected bool $reference = false;
-    protected string $provider = '';
+    protected string $provider;
+    protected DateTimeImmutable $updatedAt;
 
     public function getId(): ?int
     {
@@ -55,6 +59,18 @@ abstract class DoctrineCurrency
     public function setProvider(string $provider): DoctrineCurrency
     {
         $this->provider = $provider;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(DateTimeImmutable $updatedAt): DoctrineCurrency
+    {
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }
