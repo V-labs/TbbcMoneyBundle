@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tbbc\MoneyBundle\Pair;
 
 use DateTime;
+use DateTimeImmutable;
 use Money\Converter;
 use Money\Currencies;
 use Money\Currencies\ISOCurrencies;
@@ -19,6 +20,7 @@ use Tbbc\MoneyBundle\Manager\DoctrineCurrencyManager;
 use Tbbc\MoneyBundle\MoneyException;
 use Tbbc\MoneyBundle\Repository\DoctrineCurrencyRepository;
 use Tbbc\MoneyBundle\TbbcMoneyEvents;
+use Traversable;
 
 /**
  * Class PairManager.
@@ -37,7 +39,7 @@ class PairManager implements PairManagerInterface, Exchange
         iterable $ratioProviders
     ) {
         $this->currencies = new ISOCurrencies();
-        $this->ratioProviders = $ratioProviders instanceof \Traversable ? iterator_to_array($ratioProviders) : $ratioProviders;
+        $this->ratioProviders = $ratioProviders instanceof Traversable ? iterator_to_array($ratioProviders) : $ratioProviders;
     }
 
     /**
@@ -148,6 +150,8 @@ class PairManager implements PairManagerInterface, Exchange
         foreach ($this->doctrineCurrencyManager->findAll() as $doctrineCurrency) {
 
             if ($doctrineCurrency->getCurrencyCode() != $this->getReferenceCurrencyCode()) {
+                $doctrineCurrency->setUpdatedAt(new DateTimeImmutable());
+
                 /** @var RatioProviderInterface $ratioProvider */
                 $ratioProvider = $this->ratioProviders[$doctrineCurrency->getProvider()];
 
