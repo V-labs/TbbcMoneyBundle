@@ -10,10 +10,15 @@ use StringBackedEnum;
 abstract class DoctrineCurrency
 {
     protected ?int $id = null;
-    protected string $currencyCode = '';
-    protected bool $reference = false;
-    protected string $provider;
+    protected ?string $currencyCode = '';
+    protected ?bool $reference = false;
+    protected ?string $provider = null;
     protected DateTimeImmutable $updatedAt;
+
+    public function __construct()
+    {
+        $this->updatedAt = new DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {
@@ -27,12 +32,12 @@ abstract class DoctrineCurrency
         return $this;
     }
 
-    public function getCurrencyCode(): string
+    public function getCurrencyCode(): ?string
     {
         return $this->currencyCode;
     }
 
-    public function setCurrencyCode(string $currencyCode): DoctrineCurrency
+    public function setCurrencyCode(?string $currencyCode): DoctrineCurrency
     {
         $this->currencyCode = $currencyCode;
 
@@ -51,12 +56,12 @@ abstract class DoctrineCurrency
         return $this;
     }
 
-    public function getProvider(): string
+    public function getProvider(): ?string
     {
         return $this->provider;
     }
 
-    public function setProvider(string $provider): DoctrineCurrency
+    public function setProvider(?string $provider): DoctrineCurrency
     {
         $this->provider = $provider;
 
